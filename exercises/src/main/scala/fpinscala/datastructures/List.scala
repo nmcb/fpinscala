@@ -111,11 +111,14 @@ object List {
   def reverse[A](l: List[A]): List[A] =
     foldLeft(l, Nil: List[A])((acc, a) => Cons(a, acc))
 
-  def foldRight2[A, B](l: List[A], z: B)(f: (A, B) => B): B =
+  def foldRightByFoldLeft[A, B](l: List[A], z: B)(f: (A, B) => B): B =
     foldLeft(reverse(l), z)((b, a) => f(a, b))
 
-  def foldRight3[A, B](l: List[A], z: B)(f: (A, B) => B): B =
+  def foldRightByFoldLeft2[A, B](l: List[A], z: B)(f: (A, B) => B): B =
     foldLeft(l, (b: B) => b)((g, a) => b => g(f(a, b)))(z)
+
+  def appendByFoldRight[A](l: List[A], m: List[A]): List[A] =
+    foldRight(l, m)(Cons(_, _))
 
   def map[A, B](l: List[A])(f: A => B): List[B] = sys.error("todo")
 }
