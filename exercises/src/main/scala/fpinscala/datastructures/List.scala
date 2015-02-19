@@ -120,5 +120,12 @@ object List {
   def appendByFoldRight[A](l: List[A], m: List[A]): List[A] =
     foldRight(l, m)(Cons(_, _))
 
-  def map[A, B](l: List[A])(f: A => B): List[B] = sys.error("todo")
+  def concat[A](ll: List[List[A]]): List[A] =
+    foldRight(ll, Nil:List[A])(append)
+
+  def map[A, B](l: List[A])(f: A => B): List[B] = foldRight(l, Nil:List[B])((a, bs) => Cons(f(a), bs))
+
+  def addone(l: List[Int]): List[Int] = foldRight(l, Nil:List[Int])((i,m) => Cons(i+1, m))
+
+  def tostr(l: List[Double]): List[String] = foldRight(l, Nil:List[String])((d,m) => Cons(d.toString, m))
 }
