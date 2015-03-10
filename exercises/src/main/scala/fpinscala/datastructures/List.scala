@@ -1,4 +1,5 @@
 package fpinscala.datastructures
+import scala.collection.mutable.ListBuffer
 
 sealed trait List[+A]
 // `List` data type, parameterized on a type, `A`
@@ -121,11 +122,56 @@ object List {
     foldRight(l, m)(Cons(_, _))
 
   def concat[A](ll: List[List[A]]): List[A] =
-    foldRight(ll, Nil:List[A])(append)
+    foldRight(ll, Nil: List[A])(append)
 
-  def map[A, B](l: List[A])(f: A => B): List[B] = foldRight(l, Nil:List[B])((a, bs) => Cons(f(a), bs))
+  def map[A, B](as: List[A])(f: A => B): List[B] =
+    foldRight(as, Nil: List[B])((a, bs) => Cons(f(a), bs))
 
-  def addone(l: List[Int]): List[Int] = foldRight(l, Nil:List[Int])((i,m) => Cons(i+1, m))
+  def mapimp[A, B](as: List[A])(f: A => B): List[B] = {
+    val buf = new ListBuffer[B]
+    def loop(as: List[A]): Unit = as match {
+      case Nil        => ()
+      case Cons(h, t) => buf += f(h); loop(t)
+    }
+    loop(as)
+    // converting from scala's buffer list to our list.
+    List(buf.toList: _*)
+  }
 
-  def tostr(l: List[Double]): List[String] = foldRight(l, Nil:List[String])((d,m) => Cons(d.toString, m))
+  def addone(is: List[Int]): List[Int] =
+    foldRight(is, Nil: List[Int])((i, m) => Cons(i + 1, m))
+
+  def tostr(ds: List[Double]): List[String] =
+    foldRight(ds, Nil: List[String])((d, m) => Cons(d.toString, m))
+
+  def filter[A](as: List[A])(f: A => Boolean): List[A] =
+    foldRight(as, Nil: List[A])((h, t) => if (f(h)) Cons(h, t) else t)
+
+  def even(as: List[Int]) = filter(as)(_ % 2 == 0)
+
+  val _even = even(List(1, 2, 3, 4, 5, 6, 7, 8))
+
+  def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] =
+    concat(map(as)(f))
+
+  def filterByFlatMap[A](as: List[A])(f: A => Boolean): List[A] =
+    flatMap(as)(a => if (f(a)) List(a) else Nil)
+
+  def zip[A, B, C](as: List[A], bs: List[B])(f: (A, B) => C): List[C] = (as, bs) match {
+    case (Nil, _)                   => Nil
+    case (_, Nil)                   => Nil
+    case (Cons(a, ta), Cons(b, tb)) => Cons(f(a, b), zip(ta, tb)(f))
+  }
+
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = {
+    def hasInit(as: List[A], is: List[A]): Boolean = (as, is) match {
+      case (_, Nil)                               => true
+      case (Cons(a, at), Cons(i, it)) if (a == i) => hasInit(at, it)
+    }
+    sub match {
+      case Nil                             => false
+      case Cons(h, t) if hasInit(sup, sub) => true
+      case Cons(h, t)                      => hasSubsequence(t, sub)
+    }
+  }
 }
