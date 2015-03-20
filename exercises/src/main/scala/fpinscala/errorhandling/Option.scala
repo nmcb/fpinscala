@@ -53,11 +53,33 @@ object Option {
   def mean(xs: Seq[Double]): Option[Double] =
     if (xs.isEmpty) None
     else Some(xs.sum / xs.length)
-  def variance(xs: Seq[Double]): Option[Double] = sys.error("todo")
 
-  def map2[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = sys.error("todo")
+  def variance(xs: Seq[Double]): Option[Double] =
+    mean(xs) flatMap (m => mean(xs.map(x => math.pow(x - m, 2))))
 
-  def sequence[A](a: List[Option[A]]): Option[List[A]] = sys.error("todo")
+  def _map2[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = (a, b) match {
+    case (None, _)          => None
+    case (_, None)          => None
+    case (Some(a), Some(b)) => Some(f(a, b))
+  }
 
-  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = sys.error("todo")
+  def map2[A, B, C](oa: Option[A], ob: Option[B])(f: (A, B) => C): Option[C] =
+    oa flatMap (a => ob map (b => f(a, b)))
+
+  def map3[A, B, C, D](oa: Option[A], ob: Option[B], oc: Option[C])(f: (A, B, C) => D): Option[D] =
+    oa flatMap (a => ob flatMap (b => oc map (c => f(a, b, c))))
+
+  // needed to scoop the answers
+  def sequence[A](a: List[Option[A]]): Option[List[A]] = a match {
+    case Nil    => Some(Nil)
+    case h :: t => h flatMap (hh => sequence(t) map (hh :: _))
+  }
+
+  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = a match {
+    case Nil    => Some(Nil)
+    case h :: t => map2(f(h), traverse(t)(f))(_ :: _)
+  }
+
+  def sequenceWithTraverse[A](a: List[Option[A]]): Option[List[A]] =
+    traverse(a)(x => x)
 }
