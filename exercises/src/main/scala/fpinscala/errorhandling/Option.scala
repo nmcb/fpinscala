@@ -82,4 +82,9 @@ object Option {
 
   def sequenceWithTraverse[A](a: List[Option[A]]): Option[List[A]] =
     traverse(a)(x => x)
+
+  // Note! Between map, lift, sequence, traverse, map2, map3, and so
+  // on, you should never have to modify any existing functions to
+  // work with optional values.
+
 }
