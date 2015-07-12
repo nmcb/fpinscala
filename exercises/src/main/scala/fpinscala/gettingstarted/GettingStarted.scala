@@ -21,11 +21,11 @@ object MyModule {
   // A definition of factorial, using a local, tail recursive function
   def factorial(n: Int): Int = {
     @annotation.tailrec
-    def go(n: Int, acc: Int): Int =
+    def loop(n: Int, acc: Int): Int =
       if (n <= 0) acc
-      else go(n - 1, n * acc)
+      else loop(n - 1, n * acc)
 
-    go(n, 1)
+    loop(n, 1)
   }
 
   // Another implementation of `factorial`, this time with a `while` loop
@@ -57,7 +57,7 @@ object MyModule {
   }
 
   // We can generalize `formatAbs` and `formatFactorial` to
-  // accept a _function_ as a parameter
+  // accept a _function_ `f` as parameter
   def formatResult(name: String, n: Int, f: Int => Int) = {
     val msg = "The %s of %d is %d."
     msg.format(name, n, f(n))
@@ -78,7 +78,7 @@ object FormatAbsAndFactorial {
 
 // Functions get passed around so often in FP that it's
 // convenient to have syntax for constructing a function
-// *without* having to give it a name
+// _without_ having to give it a name
 object AnonymousFunctions {
   import fpinscala.gettingstarted.MyModule._
 
